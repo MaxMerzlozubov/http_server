@@ -9,6 +9,7 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <sys/stat.h>
 
 
 using namespace std;
@@ -58,6 +59,30 @@ int main(int argc, char** argv) {
                 exit(EXIT_FAILURE);
         }
     }
+    //starting a daemon
+    int process_id = fork();
+
+    if (process_id < 0) {
+        cout << "Fork failed\n" << endl;
+        exit(1);
+    }
+
+    //parent process. KILL HIM!!
+    if (process_id > 0) {
+        cout << "I am parent and I am going to die\n";
+        exit(0);
+    }
+
+    umask(0);
+    int sid = setsid();
+    if(sid < 0) {
+        // Return failure
+        exit(1);
+    }
+
+    close(STDIN_FILENO);
+    close(STDOUT_FILENO);
+    close(STDERR_FILENO);
 
     //now lets start the server socket
     int sock_fd, newsock_fd,cli_len;
