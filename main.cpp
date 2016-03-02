@@ -80,6 +80,8 @@ int main(int argc, char** argv) {
         exit(1);
     }
 
+    chdir(dir.c_str());
+
     close(STDIN_FILENO);
     close(STDOUT_FILENO);
     close(STDERR_FILENO);
