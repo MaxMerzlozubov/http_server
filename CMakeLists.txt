@@ -4,6 +4,7 @@ project(http_server)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 set(SOURCE_FILES main.cpp)
-file(MAKE_DIRECTORY /home/yehuda/final/final)
-set( CMAKE_RUNTIME_OUTPUT_DIRECTORY /home/yehuda/final/final )
+
+file(MAKE_DIRECTORY /home/box/final/final)
+set( CMAKE_RUNTIME_OUTPUT_DIRECTORY /home/box/final/final )
 add_executable(final  ${SOURCE_FILES})

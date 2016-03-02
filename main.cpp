@@ -37,7 +37,7 @@ void doprocessing (int sock) {
 
 int main(int argc, char** argv) {
     string ip;
-    uint16_t port;
+    uint16_t port = 0;
     string dir;
 
     int opt;
@@ -61,7 +61,7 @@ int main(int argc, char** argv) {
 
     //now lets start the server socket
     int sock_fd, newsock_fd,cli_len;
-    char buffer[256];
+    char buffer[1024];
     struct sockaddr_in serv_addr, cli_addr;
     int n, pid;
 
