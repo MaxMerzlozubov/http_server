@@ -40,7 +40,11 @@ int on_message_complete(http_parser* _) {
 
 int on_url(http_parser* parser, const char* at, size_t length) {
     ((char*)parser->data)[0] = '.';
-    strncpy((char*) parser->data + 1, at, length);
+    if (length == 1) {
+        strcpy((char*) parser->data + 1, "index.html");
+    } else {
+        strncpy((char *) parser->data + 1, at, length);
+    }
     return 0;
 }
 
