@@ -11,6 +11,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/stat.h>
+#include <sstream>
 #include "http_parser.h"
 
 
@@ -79,34 +80,57 @@ void doprocessing (int sock) {
         exit(1);
     }
 
-    http_parser_settings settings;
-    memset(&settings, 0, sizeof(settings));
-    settings.on_message_begin = 0;
-    settings.on_url = on_url;
-    settings.on_header_field = 0;
-    settings.on_header_value = 0;
-    settings.on_headers_complete = 0;
-    settings.on_body = 0;
-    settings.on_message_complete = 0;
-    char* parser_buffer = new char[255];
-    memset(parser_buffer, 0, 255);
-    http_parser parser;
-    parser.data = parser_buffer;
-    http_parser_init(&parser, HTTP_REQUEST);
-    size_t nparsed = http_parser_execute(&parser, &settings, buffer, recved);
+    http_parser_settings in_settings;
+    memset(&in_settings, 0, sizeof(in_settings));
+    in_settings.on_message_begin = 0;
+    in_settings.on_url = on_url;
+    in_settings.on_header_field = 0;
+    in_settings.on_header_value = 0;
+    in_settings.on_headers_complete = 0;
+    in_settings.on_body = 0;
+    in_settings.on_message_complete = 0;
+    
+    char* in_parser_buffer = new char[255];
+    memset(in_parser_buffer, 0, 255);
+    http_parser in_parser;
+    in_parser.data = in_parser_buffer;
+    http_parser_init(&in_parser, HTTP_REQUEST);
+    size_t nparsed = http_parser_execute(&in_parser, &in_settings, buffer, recved);
     if (nparsed != (size_t) recved) {
         cout << "FAIL!!!" << endl;
     }
-    free(parser_buffer);
-/*
 
-    n = write(sock,"I got your message",18);
+    //form the result
+    std::stringstream response; // сюда будет записываться ответ клиенту
+    std::stringstream response_body; // тело ответа
+    const char *buf = "buba";
+
+     // Данные успешно получены
+        // формируем тело ответа (HTML)
+        response_body << "<title>Test C++ HTTP Server</title>\n"
+        << "<h1>Test page</h1>\n"
+        << "<p>This is body of the test page...</p>\n"
+        << "<h2>Request headers</h2>\n"
+        << "<pre>" << buf << "</pre>\n"
+        << "<em><small>Test C++ Http Server</small></em>\n";
+
+        // Формируем весь ответ вместе с заголовками
+        response << "HTTP/1.1 200 OK\r\n"
+        << "Version: HTTP/1.1\r\n"
+        << "Content-Type: text/html; charset=utf-8\r\n"
+        << "Content-Length: " << response_body.str().length()
+        << "\r\n\r\n"
+        << response_body.str();
+
+    free(in_parser_buffer);
+
+    int n = write(sock, response.str().c_str(), response.str().length());
 
     if (n < 0) {
         perror("ERROR writing to socket");
         exit(1);
     }
-*/
+
 }
 
 int main(int argc, char** argv) {
