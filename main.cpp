@@ -140,7 +140,7 @@ void doprocessing (int sock) {
         << response_body.str();
     }
 
-
+    cout << response.str() << endl;
     int n = write(sock, response.str().c_str(), response.str().length());
 
     if (n < 0) {
