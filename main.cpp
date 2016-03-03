@@ -74,7 +74,6 @@ void doprocessing (int sock) {
     bzero(buffer, DEFAULT_BUFFER_SIZE);
     recved = read(sock, buffer, DEFAULT_BUFFER_SIZE);
 
-
     if (recved < 0) {
         perror("ERROR reading from socket");
         exit(1);
@@ -201,7 +200,7 @@ int main(int argc, char** argv) {
 
     chdir(dir.c_str());
     //now lets start the server socket
-    int sock_fd, newsock_fd,cli_len;
+    int sock_fd, cli_len;
     struct sockaddr_in serv_addr, cli_addr;
     int pid;
 
@@ -235,7 +234,10 @@ int main(int argc, char** argv) {
     cli_len = sizeof(cli_addr);
 
     while (1) {
-        newsock_fd = accept(sock_fd, (struct sockaddr *) &cli_addr, (socklen_t*) &cli_len);
+
+        int newsock_fd = newsock_fd = accept(sock_fd,
+                                             (struct sockaddr *) &cli_addr,
+                                             (socklen_t*) &cli_len);
 
         if (newsock_fd < 0) {
             perror("ERROR on accept");
