@@ -39,7 +39,6 @@ int on_message_complete(http_parser* _) {
 }
 
 int on_url(http_parser* parser, const char* at, size_t length) {
-    printf("Url: %.*s\n", (int)length, at);
     strncpy((char *) parser->data, at + 1, length - 1);
     return 0;
 }
@@ -106,7 +105,7 @@ void doprocessing (int sock) {
     std::stringstream response_body;
     char buf[1024] = {0};
     FILE *f;
-    cout << in_parser_buffer << endl;
+
     int i;
     for (i = 0; in_parser_buffer[i] != 0; i++) {
         int c = in_parser_buffer[i];
@@ -114,7 +113,7 @@ void doprocessing (int sock) {
             break;
     }
     in_parser_buffer[i] = 0;
-    cout << in_parser_buffer << endl;
+
     f = fopen(in_parser_buffer, "r");
 
     free(in_parser_buffer);
@@ -140,7 +139,6 @@ void doprocessing (int sock) {
         << response_body.str();
     }
 
-    cout << response.str() << endl;
     int n = write(sock, response.str().c_str(), response.str().length());
 
     if (n < 0) {
