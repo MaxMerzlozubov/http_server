@@ -12,6 +12,7 @@
 #include <arpa/inet.h>
 #include <sys/stat.h>
 #include <sstream>
+#include <fstream>
 #include "http_parser.h"
 
 
@@ -101,29 +102,36 @@ void doprocessing (int sock) {
     }
 
     //form the result
-    std::stringstream response; // сюда будет записываться ответ клиенту
-    std::stringstream response_body; // тело ответа
-    const char *buf = "buba";
-
-     // Данные успешно получены
-        // формируем тело ответа (HTML)
-        response_body << "<title>Test C++ HTTP Server</title>\n"
-        << "<h1>Test page</h1>\n"
-        << "<p>This is body of the test page...</p>\n"
-        << "<h2>Request headers</h2>\n"
-        << "<pre>" << buf << "</pre>\n"
-        << "<em><small>Test C++ Http Server</small></em>\n";
-
-        // Формируем весь ответ вместе с заголовками
-        response << "HTTP/1.1 200 OK\r\n"
-        << "Version: HTTP/1.1\r\n"
-        << "Content-Type: text/html; charset=utf-8\r\n"
-        << "Content-Length: " << response_body.str().length()
-        << "\r\n\r\n"
-        << response_body.str();
+    std::stringstream response;
+    std::stringstream response_body;
+    char buf[1024] = {0};
+    std::fstream fs;
+    fs.open (in_parser_buffer, fstream::out);
 
     free(in_parser_buffer);
 
+    if (!fs.is_open()) {
+        cout << "is null "  << endl;
+        response << "HTTP/1.1 404 ERROR\r\n"
+        << "Version: HTTP/1.1\r\n"
+        << "Content-Type: text/html; charset=utf-8\r\n"
+        << "Content-Length: " << response_body.str().length()
+        << "\r\n\r\n";
+
+    } else {
+    fs >> buf;
+    response_body << buf;
+
+    response << "HTTP/1.1 200 OK\r\n"
+    << "Version: HTTP/1.1\r\n"
+    << "Content-Type: text/html; charset=utf-8\r\n"
+    << "Content-Length: " << response_body.str().length()
+    << "\r\n\r\n"
+    << response_body.str();
+    }
+
+
+    cout << response.str() << endl;
     int n = write(sock, response.str().c_str(), response.str().length());
 
     if (n < 0) {
@@ -158,7 +166,7 @@ int main(int argc, char** argv) {
     }
 
     //starting a daemon
-    /*
+
     int process_id = fork();
 
     if (process_id < 0) {
@@ -184,7 +192,7 @@ int main(int argc, char** argv) {
     close(STDIN_FILENO);
     close(STDOUT_FILENO);
     close(STDERR_FILENO);
-    */
+
     //now lets start the server socket
     int sock_fd, newsock_fd,cli_len;
     struct sockaddr_in serv_addr, cli_addr;
