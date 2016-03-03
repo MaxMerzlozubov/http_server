@@ -39,7 +39,7 @@ int on_message_complete(http_parser* _) {
 }
 
 int on_url(http_parser* parser, const char* at, size_t length) {
-    printf("\tfield_data[%u]: unset\n", i);
+    printf("Url: %.*s\n", (int)length, at);
     strncpy((char *) parser->data, at, length);
     return 0;
 }
