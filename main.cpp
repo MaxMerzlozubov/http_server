@@ -231,7 +231,7 @@ int main(int argc, char** argv) {
        * for the incoming connection
     */
 
-    listen(sock_fd,5);
+    listen(sock_fd, 100);
     cli_len = sizeof(cli_addr);
 
     while (1) {
