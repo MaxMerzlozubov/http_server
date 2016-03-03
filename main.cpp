@@ -247,7 +247,7 @@ int main(int argc, char** argv) {
 
         if (pid == 0) {
             /* This is the client process */
-            int sid = setsid();
+            setsid();
             close(sock_fd);
 
             doprocessing(newsock_fd);
