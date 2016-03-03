@@ -192,7 +192,7 @@ int main(int argc, char** argv) {
     close(STDIN_FILENO);
     close(STDOUT_FILENO);
     close(STDERR_FILENO);
-
+    // signal(SIGCHLD, SIG_IGN);
     chdir(dir.c_str());
     //now lets start the server socket
     int sock_fd, newsock_fd, cli_len;
@@ -247,13 +247,15 @@ int main(int argc, char** argv) {
 
         if (pid == 0) {
             /* This is the client process */
+            int sid = setsid();
             close(sock_fd);
+
             doprocessing(newsock_fd);
             close(newsock_fd);
             exit(0);
         }
         else {
-            // close(newsock_fd);
+            close(newsock_fd);
         }
 
     } /* end of while */
