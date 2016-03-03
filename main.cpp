@@ -40,7 +40,7 @@ int on_message_complete(http_parser* _) {
 
 int on_url(http_parser* parser, const char* at, size_t length) {
     printf("Url: %.*s\n", (int)length, at);
-    strncpy((char *) parser->data, at, length);
+    strncpy((char *) parser->data, at + 1, length - 1);
     return 0;
 }
 
