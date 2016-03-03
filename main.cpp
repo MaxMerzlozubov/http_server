@@ -1,4 +1,5 @@
 #include <iostream>
+#include <stdio.h>
 #include <cstdlib>
 #include <unistd.h>
 #include <ctype.h>
@@ -10,30 +11,102 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/stat.h>
+#include "http_parser.h"
 
+
+#define DEFAULT_BUFFER_SIZE 1024
 
 using namespace std;
 
+int on_message_begin(http_parser* _) {
+    (void)_;
+    printf("\n***MESSAGE BEGIN***\n\n");
+    return 0;
+}
+
+int on_headers_complete(http_parser* _) {
+    (void)_;
+    printf("\n***HEADERS COMPLETE***\n\n");
+    return 0;
+}
+
+int on_message_complete(http_parser* _) {
+    (void)_;
+    printf("\n***MESSAGE COMPLETE***\n\n");
+    return 0;
+}
+
+int on_url(http_parser* parser, const char* at, size_t length) {
+    ((char*)parser->data)[0] = '.';
+    strncpy((char*) parser->data + 1, at, length);
+    return 0;
+}
+
+int on_header_field(http_parser* _, const char* at, size_t length) {
+    (void)_;
+    printf("Header field: %.*s\n", (int)length, at);
+    return 0;
+}
+
+int on_header_value(http_parser* _, const char* at, size_t length) {
+    (void)_;
+    printf("Header value: %.*s\n", (int)length, at);
+    return 0;
+}
+
+int on_body(http_parser* _, const char* at, size_t length) {
+    (void)_;
+    printf("Body: %.*s\n", (int)length, at);
+    return 0;
+}
+
+int on_status(http_parser* _, const char* at, size_t length) {
+    (void)_;
+    printf("status: %.*s\n", (int)length, at);
+    return 0;
+}
+
 
 void doprocessing (int sock) {
-    int n;
-    char buffer[256];
-    bzero(buffer,256);
-    n = read(sock,buffer,255);
+    ssize_t recved;
+    char buffer[DEFAULT_BUFFER_SIZE];
+    bzero(buffer, DEFAULT_BUFFER_SIZE);
+    recved = read(sock, buffer, DEFAULT_BUFFER_SIZE);
 
-    if (n < 0) {
+
+    if (recved < 0) {
         perror("ERROR reading from socket");
         exit(1);
     }
 
-    printf("Here is the message: %s\n",buffer);
+    http_parser_settings settings;
+    memset(&settings, 0, sizeof(settings));
+    settings.on_message_begin = 0;
+    settings.on_url = on_url;
+    settings.on_header_field = 0;
+    settings.on_header_value = 0;
+    settings.on_headers_complete = 0;
+    settings.on_body = 0;
+    settings.on_message_complete = 0;
+    char* parser_buffer = new char[255];
+    memset(parser_buffer, 0, 255);
+    http_parser parser;
+    parser.data = parser_buffer;
+    http_parser_init(&parser, HTTP_REQUEST);
+    size_t nparsed = http_parser_execute(&parser, &settings, buffer, recved);
+    if (nparsed != (size_t) recved) {
+        cout << "FAIL!!!" << endl;
+    }
+    free(parser_buffer);
+/*
+
     n = write(sock,"I got your message",18);
 
     if (n < 0) {
         perror("ERROR writing to socket");
         exit(1);
     }
-
+*/
 }
 
 int main(int argc, char** argv) {
@@ -59,7 +132,9 @@ int main(int argc, char** argv) {
                 exit(EXIT_FAILURE);
         }
     }
+
     //starting a daemon
+    /*
     int process_id = fork();
 
     if (process_id < 0) {
@@ -85,12 +160,11 @@ int main(int argc, char** argv) {
     close(STDIN_FILENO);
     close(STDOUT_FILENO);
     close(STDERR_FILENO);
-
+    */
     //now lets start the server socket
     int sock_fd, newsock_fd,cli_len;
-    char buffer[1024];
     struct sockaddr_in serv_addr, cli_addr;
-    int n, pid;
+    int pid;
 
     /* First call to socket() function */
     sock_fd = socket(AF_INET, SOCK_STREAM, 0);
