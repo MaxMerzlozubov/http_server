@@ -101,7 +101,7 @@ void doprocessing (int sock) {
 
     //form the result
     std::stringstream response;
-    std::stringstream response_body;
+
     char buf[1024] = {0};
     FILE *f;
 
@@ -120,22 +120,17 @@ void doprocessing (int sock) {
     if (f == NULL) {
 
         response << "HTTP/1.1 404 ERROR\r\n"
-        << "Version: HTTP/1.1\r\n"
-        << "Content-Type: text/html; charset=utf-8\r\n"
-        << "Content-Length: " << response_body.str().length()
-        << "\r\n\r\n";
+                "Version: HTTP/1.1\r\n"
+                "Content-Type: text/html; charset=utf-8\r\n"
+                "Content-Length: 0 \r\n\r\n";
 
     } else {
         fread(buf, 1, 1023, f);
         fclose(f);
-        response_body << buf;
 
-        response << "HTTP/1.1 200 OK\r\n"
-        << "Version: HTTP/1.1\r\n"
-        << "Content-Type: text/html; charset=utf-8\r\n"
-        << "Content-Length: " << response_body.str().length()
-        << "\r\n\r\n"
-        << response_body.str();
+        response << "HTTP/1.1 200 OK\r\nVersion: HTTP/1.1\r\n"
+                "Content-Type: text/html; charset=utf-8\r\n"
+                "Content-Length: "  << strlen(buf) <<  "\r\n\r\n" << string(buf);
     }
 
     int n = write(sock, response.str().c_str(), response.str().length());
@@ -230,8 +225,9 @@ int main(int argc, char** argv) {
        * for the incoming connection
     */
 
-    listen(sock_fd, 100);
     cli_len = sizeof(cli_addr);
+    listen(sock_fd, 100);
+
 
     while (1) {
         newsock_fd = accept(sock_fd, (struct sockaddr *) &cli_addr, (socklen_t*) &cli_len);
@@ -257,7 +253,7 @@ int main(int argc, char** argv) {
             exit(0);
         }
         else {
-            close(newsock_fd);
+            // close(newsock_fd);
         }
 
     } /* end of while */
