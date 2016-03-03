@@ -200,7 +200,7 @@ int main(int argc, char** argv) {
 
     chdir(dir.c_str());
     //now lets start the server socket
-    int sock_fd, cli_len;
+    int sock_fd, newsock_fd, cli_len;
     struct sockaddr_in serv_addr, cli_addr;
     int pid;
 
@@ -234,10 +234,7 @@ int main(int argc, char** argv) {
     cli_len = sizeof(cli_addr);
 
     while (1) {
-
-        int newsock_fd = newsock_fd = accept(sock_fd,
-                                             (struct sockaddr *) &cli_addr,
-                                             (socklen_t*) &cli_len);
+        newsock_fd = accept(sock_fd, (struct sockaddr *) &cli_addr, (socklen_t*) &cli_len);
 
         if (newsock_fd < 0) {
             perror("ERROR on accept");
@@ -256,6 +253,7 @@ int main(int argc, char** argv) {
             /* This is the client process */
             close(sock_fd);
             doprocessing(newsock_fd);
+            close(newsock_fd);
             exit(0);
         }
         else {
