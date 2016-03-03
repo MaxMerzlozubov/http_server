@@ -105,13 +105,12 @@ void doprocessing (int sock) {
     std::stringstream response;
     std::stringstream response_body;
     char buf[1024] = {0};
-    std::fstream fs;
-    fs.open (in_parser_buffer, fstream::out);
-
+    FILE *f;
+    f = fopen(in_parser_buffer, "r");
     free(in_parser_buffer);
 
-    if (!fs.is_open()) {
-        cout << "is null "  << endl;
+    if (f == NULL) {
+
         response << "HTTP/1.1 404 ERROR\r\n"
         << "Version: HTTP/1.1\r\n"
         << "Content-Type: text/html; charset=utf-8\r\n"
@@ -119,23 +118,23 @@ void doprocessing (int sock) {
         << "\r\n\r\n";
 
     } else {
-    fs >> buf;
-    response_body << buf;
+        fread(buf, 1, 1023, f);
+        fclose(f);
+        response_body << buf;
 
-    response << "HTTP/1.1 200 OK\r\n"
-    << "Version: HTTP/1.1\r\n"
-    << "Content-Type: text/html; charset=utf-8\r\n"
-    << "Content-Length: " << response_body.str().length()
-    << "\r\n\r\n"
-    << response_body.str();
+        response << "HTTP/1.1 200 OK\r\n"
+        << "Version: HTTP/1.1\r\n"
+        << "Content-Type: text/html; charset=utf-8\r\n"
+        << "Content-Length: " << response_body.str().length()
+        << "\r\n\r\n"
+        << response_body.str();
     }
 
 
-    cout << response.str() << endl;
     int n = write(sock, response.str().c_str(), response.str().length());
 
     if (n < 0) {
-        perror("ERROR writing to socket");
+        perror("ERROR writing to socket\n");
         exit(1);
     }
 
@@ -187,12 +186,12 @@ int main(int argc, char** argv) {
         exit(1);
     }
 
-    chdir(dir.c_str());
 
     close(STDIN_FILENO);
     close(STDOUT_FILENO);
     close(STDERR_FILENO);
 
+    chdir(dir.c_str());
     //now lets start the server socket
     int sock_fd, newsock_fd,cli_len;
     struct sockaddr_in serv_addr, cli_addr;
@@ -258,6 +257,5 @@ int main(int argc, char** argv) {
 
 
 
-    cout << ip << ' ' << port << ' ' << dir << endl;
-        return 0;
+    return 0;
 }
