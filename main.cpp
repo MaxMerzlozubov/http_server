@@ -106,8 +106,17 @@ void doprocessing (int sock) {
     std::stringstream response_body;
     char buf[1024] = {0};
     FILE *f;
-    f = fopen(in_parser_buffer, "r");
     cout << in_parser_buffer << endl;
+    int i;
+    for (i = 0; in_parser_buffer[i] != 0; i++) {
+        int c = in_parser_buffer[i];
+        if (!isalnum(c) && c != '.')
+            break;
+    }
+    in_parser_buffer[i] = 0;
+    cout << in_parser_buffer << endl;
+    f = fopen(in_parser_buffer, "r");
+
     free(in_parser_buffer);
 
     if (f == NULL) {
