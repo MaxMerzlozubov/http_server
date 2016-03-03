@@ -39,12 +39,8 @@ int on_message_complete(http_parser* _) {
 }
 
 int on_url(http_parser* parser, const char* at, size_t length) {
-    ((char*)parser->data)[0] = '.';
-    if (length == 1) {
-        strcpy((char*) parser->data + 1, "index.html");
-    } else {
-        strncpy((char *) parser->data + 1, at, length);
-    }
+    printf("\tfield_data[%u]: unset\n", i);
+    strncpy((char *) parser->data, at, length);
     return 0;
 }
 
@@ -111,6 +107,7 @@ void doprocessing (int sock) {
     char buf[1024] = {0};
     FILE *f;
     f = fopen(in_parser_buffer, "r");
+    cout << in_parser_buffer << endl;
     free(in_parser_buffer);
 
     if (f == NULL) {
