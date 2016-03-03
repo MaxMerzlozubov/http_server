@@ -14,6 +14,7 @@
 #include <sstream>
 #include <fstream>
 #include "http_parser.h"
+#include <signal.h>
 
 
 #define DEFAULT_BUFFER_SIZE 1024
@@ -146,7 +147,7 @@ int main(int argc, char** argv) {
     string ip;
     uint16_t port = 0;
     string dir;
-
+    signal(SIGCHLD, SIG_IGN);
     int opt;
 
     while ((opt = getopt(argc, argv, "h:p:d:")) != -1) {
@@ -194,6 +195,7 @@ int main(int argc, char** argv) {
     close(STDERR_FILENO);
     // signal(SIGCHLD, SIG_IGN);
     chdir(dir.c_str());
+    signal(SIGCHLD, SIG_IGN);
     //now lets start the server socket
     int sock_fd, newsock_fd, cli_len;
     struct sockaddr_in serv_addr, cli_addr;
