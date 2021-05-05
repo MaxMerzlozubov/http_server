@@ -15,7 +15,7 @@
 #include <fstream>
 #include "http_parser.h"
 #include <signal.h>
-
+#include <thread>
 
 #define DEFAULT_BUFFER_SIZE 1024
 
@@ -143,6 +143,13 @@ void doprocessing (int sock) {
 
 }
 
+void foo()
+{
+	// simulate expensive operation
+	int i = 1;
+	cout << i << endl;
+}
+
 int main(int argc, char** argv) {
     string ip;
     uint16_t port = 0;
@@ -230,6 +237,9 @@ int main(int argc, char** argv) {
     cli_len = sizeof(cli_addr);
     listen(sock_fd, 100);
 
+
+	std::thread helper1(foo);
+	helper1.join();
 
     while (1) {
         newsock_fd = accept(sock_fd, (struct sockaddr *) &cli_addr, (socklen_t*) &cli_len);
